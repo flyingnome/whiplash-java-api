@@ -3,10 +3,14 @@ package com.grandst.whiplash.api;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.client.ClientProtocolException;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -21,9 +25,13 @@ public class OrderService {
 	}
 	
 	private static ArrayList<Order> parseOrderListJson(String apiJson) throws  ParseException{
+		cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();
 		JsonParser parser = new JsonParser();
-		Gson gson = new Gson();
+		GsonBuilder gb = new GsonBuilder();
+		gb.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		gb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
 		JsonArray orderArray = parser.parse(apiJson).getAsJsonArray();
 		for(int i = 0; i < orderArray.size(); i++){
 			Order o = new Order();
@@ -37,8 +45,33 @@ public class OrderService {
 			}
 			o = gson.fromJson(orderArray.get(i).getAsJsonObject(), Order.class);
 			o.setOrderItems(oiList);
+			System.out.println(o.getCreatedAt());
 			retList.add(o);
-		}		
+		}
+		return retList;	
+	}
+	
+	private static String cleanDateFormat(String json){
+		Pattern regex = Pattern.compile("\\d\\d:\\d\\d:\\d\\d[-\\+]\\d\\d:\\d\\d"); 
+		Matcher regexMatcher = regex.matcher(json);
+		StringBuffer buff = new StringBuffer();
+		while(regexMatcher.find()){
+			System.out.println("found");
+			regexMatcher.appendReplacement(buff, getSubOfMatch(regexMatcher));
+		}
+		regexMatcher.appendTail(buff);
+		json = buff.toString();
+		return json;
+	}
+	
+	private static String getSubOfMatch(Matcher matcher){
+		StringBuilder sb = new StringBuilder(matcher.group(0));
+		sb.deleteCharAt(sb.length()-3);
+		return sb.toString();
+	}
+	
+	/* 
+	private static ArrayList<Order> parseOrderListJson(String apiJson) throws  ParseException{	
 		/*
 		JSONArray jar = new JSONArray(apiJson);
 		for(int i =0;i<jar.size();i++){
@@ -165,8 +198,8 @@ public class OrderService {
 			}
 			retList.add(o);
 		}
-		*/
 		return retList;
 	}
+	*/
 
 }
