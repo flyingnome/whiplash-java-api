@@ -23,6 +23,34 @@ public class OrderService {
 	public static ArrayList<Order> getOrders(Whiplash w) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderListJson(API.get("/orders.json", w));
 	}
+	public static Order getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
+		return parseOrderJson(API.get("/orders/"+orderId, w));
+	}
+	public static Order getOrderByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
+		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
+	}
+	
+	private static Order parseOrderJson(String apiJson) throws  ParseException{
+		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
+		ArrayList<Order> retList = new ArrayList<Order>();
+		JsonParser parser = new JsonParser();
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
+		JsonObject orderObj = parser.parse(apiJson).getAsJsonObject();
+		Order o = new Order();
+		ArrayList<OrderItem> oiList = new ArrayList<OrderItem>();
+		JsonArray itemArray = orderObj.getAsJsonArray("order_items");
+		for(int j = 0; j<itemArray.size();j++){
+			OrderItem oi = new OrderItem();
+			oi = gson.fromJson(itemArray.get(j).getAsJsonObject(), OrderItem.class);
+			oiList.add(oi);
+		}
+		o = gson.fromJson(orderObj, Order.class);
+		o.setOrderItems(oiList);
+		return o;	
+	}
 	
 	private static ArrayList<Order> parseOrderListJson(String apiJson) throws  ParseException{
 		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
