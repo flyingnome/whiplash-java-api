@@ -29,7 +29,14 @@ public class OrderService {
 	public static Order getOrderByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
-	
+	public static Order createNewOrder(Whiplash w, Order o){
+		//TODO:implment this
+		return o;
+	}
+	public static Order updateOrder(Whiplash w, Order o){
+		//TODO: this too
+		return o;
+	}
 	private static Order parseOrderJson(String apiJson) throws  ParseException{
 		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();
