@@ -25,12 +25,12 @@ public class OrderService {
 	}
 	
 	private static ArrayList<Order> parseOrderListJson(String apiJson) throws  ParseException{
-		cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
+		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();
 		JsonParser parser = new JsonParser();
-		GsonBuilder gb = new GsonBuilder();
-		gb.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-		gb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		Gson gson = gb.create();
 		JsonArray orderArray = parser.parse(apiJson).getAsJsonArray();
 		for(int i = 0; i < orderArray.size(); i++){
@@ -45,7 +45,6 @@ public class OrderService {
 			}
 			o = gson.fromJson(orderArray.get(i).getAsJsonObject(), Order.class);
 			o.setOrderItems(oiList);
-			System.out.println(o.getCreatedAt());
 			retList.add(o);
 		}
 		return retList;	
@@ -56,12 +55,10 @@ public class OrderService {
 		Matcher regexMatcher = regex.matcher(json);
 		StringBuffer buff = new StringBuffer();
 		while(regexMatcher.find()){
-			System.out.println("found");
 			regexMatcher.appendReplacement(buff, getSubOfMatch(regexMatcher));
 		}
 		regexMatcher.appendTail(buff);
-		json = buff.toString();
-		return json;
+		return buff.toString();
 	}
 	
 	private static String getSubOfMatch(Matcher matcher){
