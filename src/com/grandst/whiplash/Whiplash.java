@@ -37,7 +37,7 @@ public class Whiplash {
 	}
 
 	public String getApiKey() {
-		if(test)
+		if(apiKey==null || apiKey.equals("") || apiKey.equals("test"))
 			return TEST_API_KEY;
 		return apiKey;
 	}
