@@ -3,10 +3,13 @@ package com.grandst.whiplash.api;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.message.BasicNameValuePair;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -15,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.grandst.whiplash.Whiplash;
+import com.grandst.whiplash.bean.Item;
 import com.grandst.whiplash.bean.Order;
 import com.grandst.whiplash.bean.OrderItem;
 
@@ -29,11 +33,35 @@ public class OrderService {
 	public static Order getOrderByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
-	public static Order createNewOrder(Whiplash w, Order o){
-		//TODO:implment this
+	public static Order createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
+		ArrayList<Item> iList = new ArrayList<Item>(); //keep track of the items to add to the order
+		for(OrderItem oi : o.getOrderItems()){
+			//check if the item is on the API already
+			Item i = ItemService.getItemByOriginatorId(w, oi.getItemId());
+			if(i==null || i.getId()<=0){ //it's not so create it
+				i.setSku(oi.getSku());
+				i.setTitle(oi.getTitle());
+				i.setDescription(oi.getDescription());
+				i.setOriginatorId(oi.getItemId());
+				i = ItemService.createItem(w, i);
+			}
+			iList.add(i);	
+		}
+		//TODO: get this serialized and passed up
+		List<NameValuePair> postData = new ArrayList<NameValuePair>();
+    	postData.add(new BasicNameValuePair("order",gson.toJson(o,Order.class)));
+		parseOrderJson(API.post("/orders", w, postData, 3000, 3000));
 		return o;
 	}
 	public static Order updateOrder(Whiplash w, Order o){
+		//TODO: this too
+		return o;
+	}
+	public static Order deleteOrder(Whiplash w, Order o){
 		//TODO: this too
 		return o;
 	}
