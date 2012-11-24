@@ -2,6 +2,7 @@ package com.grandst.whiplash.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -20,6 +21,9 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.grandst.whiplash.Whiplash;
 
 
@@ -43,7 +47,14 @@ public final class API {
 		HttpClient client = new DefaultHttpClient(httpParameters); 	
 		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
 		if (postData != null) {
-			postReq.setEntity(new UrlEncodedFormEntity(postData));
+			HashMap<String,String> map = new HashMap<String,String>();
+			for(NameValuePair nvp : postData){
+				 map.put(nvp.getName(),nvp.getValue());
+			}
+			GsonBuilder gb = new GsonBuilder()
+				.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+				.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+			postReq.setEntity(new StringEntity(gb.create().toJson(map)));
 		}
 		setHeaders(postReq,w);
 		final HttpResponse response = client.execute(postReq);  
@@ -58,8 +69,7 @@ public final class API {
 		HttpClient client = new DefaultHttpClient(httpParameters); 	
 		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
 		if (jsonObj != null) {
-			postReq.setHeader("Accept", "application/json");
-			postReq.setHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+			//postReq.setHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
 			postReq.setEntity(jsonObj);
 		}
 		setHeaders(postReq,w);
@@ -110,6 +120,8 @@ public final class API {
 	
 	private static void setHeaders(HttpRequestBase req, Whiplash w){
 		req.setHeader("X-API-KEY",w.getApiKey());
+		req.setHeader("Content-Type", "application/json");
+		req.setHeader("Accept","application/json");
 		//use later
 		//req.setHeader("X-API-VERSION",API_KEY);
 	}

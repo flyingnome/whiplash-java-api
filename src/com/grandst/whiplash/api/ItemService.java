@@ -19,22 +19,23 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.grandst.whiplash.Whiplash;
 import com.grandst.whiplash.bean.Item;
+import com.grandst.whiplash.util.WhiplashReturn;
 
 public class ItemService {
 	
-	public static ArrayList<Item> getItems(Whiplash w) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItems(Whiplash w) throws ClientProtocolException, ParseException, IOException{
 		return parseItemListJson(API.get("/items.json/", w));
 	}
-	public static ArrayList<Item> getItemsBySku(Whiplash w, String sku) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemsBySku(Whiplash w, String sku) throws ClientProtocolException, ParseException, IOException{
 		return parseItemListJson(API.get("/items/sku/"+sku, w));
 	}
-	public static Item getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
 		return parseItemJson(API.get("/items/"+itemId, w));
 	}
-	public static Item getItemByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseItemJson(API.get("/items/originator/"+originatorId, w));
 	}
-	public static Item createItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn createItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException{
 		List<NameValuePair> postData = new ArrayList<NameValuePair>();
     	postData.add(new BasicNameValuePair("sku",i.getSku()));
     	postData.add(new BasicNameValuePair("title",i.getTitle()));
@@ -43,7 +44,10 @@ public class ItemService {
 		return parseItemJson(API.post("/items", w, postData, 3000,30000));
 	}
 	
-	private static ArrayList<Item> parseItemListJson(String apiJson) throws  ParseException{
+	private static WhiplashReturn parseItemListJson(String apiJson) throws  ParseException{
+		WhiplashReturn retObj = new WhiplashReturn();
+		if(retObj.tryParseError(apiJson))
+			return retObj;
 		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Item> retList = new ArrayList<Item>();
 		JsonParser parser = new JsonParser();
@@ -57,10 +61,14 @@ public class ItemService {
 			o = gson.fromJson(itemArray.get(i).getAsJsonObject(), Item.class);
 			retList.add(o);
 		}
-		return retList;	
+		retObj.setReturnObj(retList);
+		return retObj;	
 	}
 	
-	private static Item parseItemJson(String apiJson) throws  ParseException{
+	private static WhiplashReturn parseItemJson(String apiJson) throws  ParseException{
+		WhiplashReturn retObj = new WhiplashReturn();
+		if(retObj.tryParseError(apiJson))
+			return retObj;
 		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();
 		GsonBuilder gb = new GsonBuilder()
@@ -68,7 +76,8 @@ public class ItemService {
 			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		Gson gson = gb.create();
 		JsonObject itemObj = parser.parse(apiJson).getAsJsonObject();
-		return  gson.fromJson(itemObj, Item.class);
+		retObj.setReturnObj( gson.fromJson(itemObj, Item.class));
+		return retObj;
 	}
 	
 	private static String cleanDateFormat(String json){

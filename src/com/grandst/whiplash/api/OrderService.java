@@ -3,14 +3,10 @@ package com.grandst.whiplash.api;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.message.BasicNameValuePair;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -22,49 +18,32 @@ import com.grandst.whiplash.Whiplash;
 import com.grandst.whiplash.bean.Item;
 import com.grandst.whiplash.bean.Order;
 import com.grandst.whiplash.bean.OrderItem;
+import com.grandst.whiplash.util.WhiplashReturn;
 
 public class OrderService {
 	
-	public static ArrayList<Order> getOrders(Whiplash w) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrders(Whiplash w) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderListJson(API.get("/orders.json", w));
 	}
-	public static Order getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderJson(API.get("/orders/"+orderId, w));
 	}
-	public static Order getOrderByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrderByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
-	public static Order createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
 		for(OrderItem oi : o.getOrderItems()){
 			//check if the item is on the API already
-			Item i = ItemService.getItemByOriginatorId(w, oi.getItemId());
+			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getItemId()).getReturnObj();
 			if(i==null || i.getId()<=0){ //it's not so create it
 				i.setSku(oi.getSku());
 				i.setTitle(oi.getTitle());
 				i.setDescription(oi.getDescription());
 				i.setOriginatorId(oi.getItemId());
-				i = ItemService.createItem(w, i);
+				i = (Item)ItemService.createItem(w, i).getReturnObj();
 			}
 		}
-		/*
-		for(Item it : iList){
-			HashMap<String,String> map = new HashMap<String,String>();
-		    map.put("quantity",""+it.getQuantity());
-		    map.put("item_id",""+it.getId());
-		}
-		//TODO: get this serialized and passed up
-		List<NameValuePair> postData = new ArrayList<NameValuePair>();
-    	postData.add(new BasicNameValuePair("shipping_name",o.getShippingName()));
-    	postData.add(new BasicNameValuePair("shipping_address_1",o.getShippingAddress()));
-    	postData.add(new BasicNameValuePair("shipping_address_2",o.getShippingAddress2()));
-    	postData.add(new BasicNameValuePair("shipping_city",o.getShippingCity()));
-    	postData.add(new BasicNameValuePair("shipping_state",o.getShippingState()));
-    	postData.add(new BasicNameValuePair("shipping_zip",o.getShippingZip()));
-    	postData.add(new BasicNameValuePair("email","hi@grandst.com"));
-    	postData.add(new BasicNameValuePair("order_items",""));
-    	*/
-		parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
-		return o;
+		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 	}
 	public static Order updateOrder(Whiplash w, Order o){
 		//TODO: this too
@@ -74,9 +53,11 @@ public class OrderService {
 		//TODO: this too
 		return o;
 	}
-	private static Order parseOrderJson(String apiJson) throws  ParseException{
+	private static WhiplashReturn parseOrderJson(String apiJson) throws  ParseException{
+		WhiplashReturn retObj = new WhiplashReturn();
+		if(retObj.tryParseError(apiJson))
+			return retObj;
 		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
-		ArrayList<Order> retList = new ArrayList<Order>();
 		JsonParser parser = new JsonParser();
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -93,10 +74,14 @@ public class OrderService {
 		}
 		o = gson.fromJson(orderObj, Order.class);
 		o.setOrderItems(oiList);
-		return o;	
+		retObj.setReturnObj(o);
+		return retObj;
 	}
 	
-	private static ArrayList<Order> parseOrderListJson(String apiJson) throws  ParseException{
+	private static WhiplashReturn parseOrderListJson(String apiJson) throws  ParseException{
+		WhiplashReturn retObj = new WhiplashReturn();
+		if(retObj.tryParseError(apiJson))
+			return retObj;
 		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();
 		JsonParser parser = new JsonParser();
@@ -119,7 +104,8 @@ public class OrderService {
 			o.setOrderItems(oiList);
 			retList.add(o);
 		}
-		return retList;	
+		retObj.setReturnObj(retList);
+		return retObj;	
 	}
 	
 	private static String cleanDateFormat(String json){
