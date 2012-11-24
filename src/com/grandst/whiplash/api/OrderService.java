@@ -3,6 +3,7 @@ package com.grandst.whiplash.api;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,11 +35,6 @@ public class OrderService {
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
 	public static Order createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
-		GsonBuilder gb = new GsonBuilder()
-			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
-			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
-		Gson gson = gb.create();
-		ArrayList<Item> iList = new ArrayList<Item>(); //keep track of the items to add to the order
 		for(OrderItem oi : o.getOrderItems()){
 			//check if the item is on the API already
 			Item i = ItemService.getItemByOriginatorId(w, oi.getItemId());
@@ -49,12 +45,25 @@ public class OrderService {
 				i.setOriginatorId(oi.getItemId());
 				i = ItemService.createItem(w, i);
 			}
-			iList.add(i);	
+		}
+		/*
+		for(Item it : iList){
+			HashMap<String,String> map = new HashMap<String,String>();
+		    map.put("quantity",""+it.getQuantity());
+		    map.put("item_id",""+it.getId());
 		}
 		//TODO: get this serialized and passed up
 		List<NameValuePair> postData = new ArrayList<NameValuePair>();
-    	postData.add(new BasicNameValuePair("order",gson.toJson(o,Order.class)));
-		parseOrderJson(API.post("/orders", w, postData, 3000, 3000));
+    	postData.add(new BasicNameValuePair("shipping_name",o.getShippingName()));
+    	postData.add(new BasicNameValuePair("shipping_address_1",o.getShippingAddress()));
+    	postData.add(new BasicNameValuePair("shipping_address_2",o.getShippingAddress2()));
+    	postData.add(new BasicNameValuePair("shipping_city",o.getShippingCity()));
+    	postData.add(new BasicNameValuePair("shipping_state",o.getShippingState()));
+    	postData.add(new BasicNameValuePair("shipping_zip",o.getShippingZip()));
+    	postData.add(new BasicNameValuePair("email","hi@grandst.com"));
+    	postData.add(new BasicNameValuePair("order_items",""));
+    	*/
+		parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 		return o;
 	}
 	public static Order updateOrder(Whiplash w, Order o){

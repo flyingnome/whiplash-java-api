@@ -14,6 +14,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -43,6 +44,23 @@ public final class API {
 		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
 		if (postData != null) {
 			postReq.setEntity(new UrlEncodedFormEntity(postData));
+		}
+		setHeaders(postReq,w);
+		final HttpResponse response = client.execute(postReq);  
+		InputStream inputStream;
+		inputStream = response.getEntity().getContent();		
+		return inputStreamToString(inputStream);
+	}
+	public static String post(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException {
+		HttpParams httpParameters = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		HttpClient client = new DefaultHttpClient(httpParameters); 	
+		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
+		if (jsonObj != null) {
+			postReq.setHeader("Accept", "application/json");
+			postReq.setHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+			postReq.setEntity(jsonObj);
 		}
 		setHeaders(postReq,w);
 		final HttpResponse response = client.execute(postReq);  

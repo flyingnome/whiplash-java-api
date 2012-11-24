@@ -1,9 +1,17 @@
 package com.grandst.whiplash.bean;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.http.entity.StringEntity;
+
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.grandst.whiplash.constants.OrderStatus;
 
 public class Order {
@@ -361,6 +369,49 @@ public class Order {
 			return "Unpaid";
 		else
 			return "Unknown";
+	}
+	
+	public StringEntity getSerializedOrderForApiCreate() throws UnsupportedEncodingException{
+		ApiOrder ao = new ApiOrder();
+		ao.shippingName = this.getShippingName();
+		ao.shippingAddress = this.getShippingAddress();
+		ao.shippingAddress2 = this.getShippingAddress2();
+		ao.shippingCity = this.getShippingCity();
+		ao.shippingState = this.getShippingState();
+		ao.shippingZip = this.getShippingZip();
+		ao.email = this.getEmail();
+		ao.items = new ArrayList<ApiItem>();
+		for(OrderItem i : this.getOrderItems()){
+			ApiItem ai = new ApiItem();
+			ai.quantity = i.getQuantity();
+			ai.itemId = i.getItemId();
+			ao.items.add(ai);
+		}
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
+		String jObj = gson.toJson(ao, ApiOrder.class);
+		return new StringEntity(jObj);
+	}
+	
+	private class ApiOrder{
+		public ApiOrder(){}
+		private String shippingName;
+		private String shippingAddress;
+		private String shippingAddress2;
+		private String shippingCity;
+		private String shippingState;
+		private String shippingZip;
+		private String email;
+		private ArrayList<ApiItem> items;
+		
+	}
+	private class ApiItem{
+		public ApiItem(){}
+		private Integer quantity;
+		private long itemId;
+		
 	}
 	
 
