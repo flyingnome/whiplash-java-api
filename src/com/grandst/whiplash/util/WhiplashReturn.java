@@ -45,4 +45,6 @@ public class WhiplashReturn {
 		}
 		return false;
 	}
+	
+	
 }

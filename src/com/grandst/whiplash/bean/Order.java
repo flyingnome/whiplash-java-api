@@ -11,7 +11,6 @@ import org.apache.http.entity.StringEntity;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.grandst.whiplash.constants.OrderStatus;
 
 public class Order {
@@ -380,18 +379,36 @@ public class Order {
 		ao.shippingState = this.getShippingState();
 		ao.shippingZip = this.getShippingZip();
 		ao.email = this.getEmail();
-		ao.items = new ArrayList<ApiItem>();
+		ao.orderItemsAttributes = new ArrayList<ApiItem>();
 		for(OrderItem i : this.getOrderItems()){
 			ApiItem ai = new ApiItem();
 			ai.quantity = i.getQuantity();
 			ai.itemId = i.getItemId();
-			ao.items.add(ai);
+			ao.orderItemsAttributes.add(ai);
 		}
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		Gson gson = gb.create();
 		String jObj = gson.toJson(ao, ApiOrder.class);
+		return new StringEntity(jObj);
+	}
+	public StringEntity getSerializedOrderForApiSansItems() throws UnsupportedEncodingException{
+		ApiOrderHolder oh = new ApiOrderHolder();
+		ApiOrder ao = new ApiOrder();
+		ao.shippingName = this.getShippingName();
+		ao.shippingAddress = this.getShippingAddress();
+		ao.shippingAddress2 = this.getShippingAddress2();
+		ao.shippingCity = this.getShippingCity();
+		ao.shippingState = this.getShippingState();
+		ao.shippingZip = this.getShippingZip();
+		ao.email = this.getEmail();
+		oh.order = ao;
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
+		String jObj = gson.toJson(oh, ApiOrderHolder.class);
 		return new StringEntity(jObj);
 	}
 	
@@ -404,7 +421,7 @@ public class Order {
 		private String shippingState;
 		private String shippingZip;
 		private String email;
-		private ArrayList<ApiItem> items;
+		private ArrayList<ApiItem> orderItemsAttributes;
 		
 	}
 	private class ApiItem{
@@ -412,6 +429,10 @@ public class Order {
 		private Integer quantity;
 		private long itemId;
 		
+	}
+	private class ApiOrderHolder{
+		public ApiOrderHolder(){}
+		private ApiOrder order;
 	}
 	
 

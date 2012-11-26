@@ -120,7 +120,8 @@ public final class API {
 	
 	private static void setHeaders(HttpRequestBase req, Whiplash w){
 		req.setHeader("X-API-KEY",w.getApiKey());
-		req.setHeader("Content-Type", "application/json");
+		req.setHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+		//req.setHeader("Content-Type", "application/json");
 		req.setHeader("Accept","application/json");
 		//use later
 		//req.setHeader("X-API-VERSION",API_KEY);

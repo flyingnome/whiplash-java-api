@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -19,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.grandst.whiplash.Whiplash;
 import com.grandst.whiplash.bean.Item;
+import com.grandst.whiplash.util.JsonCleaner;
 import com.grandst.whiplash.util.WhiplashReturn;
 
 public class ItemService {
@@ -48,7 +47,7 @@ public class ItemService {
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
 			return retObj;
-		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
+		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Item> retList = new ArrayList<Item>();
 		JsonParser parser = new JsonParser();
 		GsonBuilder gb = new GsonBuilder()
@@ -69,7 +68,7 @@ public class ItemService {
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
 			return retObj;
-		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
+		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -79,22 +78,6 @@ public class ItemService {
 		retObj.setReturnObj( gson.fromJson(itemObj, Item.class));
 		return retObj;
 	}
-	
-	private static String cleanDateFormat(String json){
-		Pattern regex = Pattern.compile("\\d\\d:\\d\\d:\\d\\d[-\\+]\\d\\d:\\d\\d"); 
-		Matcher regexMatcher = regex.matcher(json);
-		StringBuffer buff = new StringBuffer();
-		while(regexMatcher.find()){
-			regexMatcher.appendReplacement(buff, getSubOfMatch(regexMatcher));
-		}
-		regexMatcher.appendTail(buff);
-		return buff.toString();
-	}
-	
-	private static String getSubOfMatch(Matcher matcher){
-		StringBuilder sb = new StringBuilder(matcher.group(0));
-		sb.deleteCharAt(sb.length()-3);
-		return sb.toString();
-	}
+
 
 }

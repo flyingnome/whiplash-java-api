@@ -3,8 +3,6 @@ package com.grandst.whiplash.api;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.client.ClientProtocolException;
 
@@ -18,6 +16,7 @@ import com.grandst.whiplash.Whiplash;
 import com.grandst.whiplash.bean.Item;
 import com.grandst.whiplash.bean.Order;
 import com.grandst.whiplash.bean.OrderItem;
+import com.grandst.whiplash.util.JsonCleaner;
 import com.grandst.whiplash.util.WhiplashReturn;
 
 public class OrderService {
@@ -34,16 +33,42 @@ public class OrderService {
 	public static WhiplashReturn createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
 		for(OrderItem oi : o.getOrderItems()){
 			//check if the item is on the API already
-			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getItemId()).getReturnObj();
+			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getOriginatorId()).getReturnObj();
 			if(i==null || i.getId()<=0){ //it's not so create it
+				i = new Item();
 				i.setSku(oi.getSku());
 				i.setTitle(oi.getTitle());
 				i.setDescription(oi.getDescription());
-				i.setOriginatorId(oi.getItemId());
+				i.setOriginatorId(oi.getOriginatorId());
 				i = (Item)ItemService.createItem(w, i).getReturnObj();
 			}
+			oi.setItemId(i.getId());
 		}
 		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
+	}
+	public static WhiplashReturn createNewOrder2Step(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
+		Order apiOrder = (Order)OrderService.getOrderById(w,o.getId()).getReturnObj();
+		if(apiOrder ==null || apiOrder.getId()<=0){ //order doesnt exist, so create it
+			apiOrder = (Order)OrderService.createOrderWithoutItems(w,o).getReturnObj();
+		}
+		for(OrderItem oi : o.getOrderItems()){
+			//check if the item is on the API already
+			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getOriginatorId()).getReturnObj();
+			if(i==null || i.getId()<=0){ //it's not so create it
+				i = new Item();
+				i.setSku(oi.getSku());
+				i.setTitle(oi.getTitle());
+				i.setDescription(oi.getDescription());
+				i.setOriginatorId(oi.getOriginatorId());
+				i = (Item)ItemService.createItem(w, i).getReturnObj();
+			}
+			oi.setItemId(i.getId());
+			oi = (OrderItem)OrderItemService.createOrderItem(w, oi.getSerializedOrderItemForApi()).getReturnObj();
+		}
+		return parseOrderJson(API.get("/orders/"+apiOrder.getId(), w));
+	}
+	public static WhiplashReturn createOrderWithoutItems(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
+		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiSansItems(), 3000, 3000));
 	}
 	public static Order updateOrder(Whiplash w, Order o){
 		//TODO: this too
@@ -57,7 +82,7 @@ public class OrderService {
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
 			return retObj;
-		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
+		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -82,7 +107,7 @@ public class OrderService {
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
 			return retObj;
-		apiJson = cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
+		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();
 		JsonParser parser = new JsonParser();
 		GsonBuilder gb = new GsonBuilder()
@@ -107,21 +132,5 @@ public class OrderService {
 		retObj.setReturnObj(retList);
 		return retObj;	
 	}
-	
-	private static String cleanDateFormat(String json){
-		Pattern regex = Pattern.compile("\\d\\d:\\d\\d:\\d\\d[-\\+]\\d\\d:\\d\\d"); 
-		Matcher regexMatcher = regex.matcher(json);
-		StringBuffer buff = new StringBuffer();
-		while(regexMatcher.find()){
-			regexMatcher.appendReplacement(buff, getSubOfMatch(regexMatcher));
-		}
-		regexMatcher.appendTail(buff);
-		return buff.toString();
-	}
-	
-	private static String getSubOfMatch(Matcher matcher){
-		StringBuilder sb = new StringBuilder(matcher.group(0));
-		sb.deleteCharAt(sb.length()-3);
-		return sb.toString();
-	}
+
 }

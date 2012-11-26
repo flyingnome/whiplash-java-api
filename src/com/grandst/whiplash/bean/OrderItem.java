@@ -1,7 +1,14 @@
 package com.grandst.whiplash.bean;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import org.apache.http.entity.StringEntity;
+
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class OrderItem {
 	public OrderItem(long id, BigDecimal price, Date createdAt,
@@ -143,6 +150,27 @@ public class OrderItem {
 
 	public void setOrderId(long orderId) {
 		this.orderId = orderId;
+	}
+	
+	public StringEntity getSerializedOrderItemForApi() throws UnsupportedEncodingException{
+		ApiOrderItem ao = new ApiOrderItem();
+		ao.quantity = this.getQuantity();
+		ao.itemId = this.getItemId();
+		ao.orderId = this.getOrderId();
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
+		String jObj = gson.toJson(ao, ApiOrderItem.class);
+		return new StringEntity(jObj);
+	}
+	
+	private class ApiOrderItem{
+		public ApiOrderItem(){}
+		private Integer quantity;
+		private long itemId;
+		private long orderId;
+		
 	}
 	
 }
