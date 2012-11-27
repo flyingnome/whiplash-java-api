@@ -46,30 +46,6 @@ public class OrderService {
 		}
 		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 	}
-	public static WhiplashReturn createNewOrder2Step(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
-		Order apiOrder = (Order)OrderService.getOrderById(w,o.getId()).getReturnObj();
-		if(apiOrder ==null || apiOrder.getId()<=0){ //order doesnt exist, so create it
-			apiOrder = (Order)OrderService.createOrderWithoutItems(w,o).getReturnObj();
-		}
-		for(OrderItem oi : o.getOrderItems()){
-			//check if the item is on the API already
-			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getOriginatorId()).getReturnObj();
-			if(i==null || i.getId()<=0){ //it's not so create it
-				i = new Item();
-				i.setSku(oi.getSku());
-				i.setTitle(oi.getTitle());
-				i.setDescription(oi.getDescription());
-				i.setOriginatorId(oi.getOriginatorId());
-				i = (Item)ItemService.createItem(w, i).getReturnObj();
-			}
-			oi.setItemId(i.getId());
-			oi = (OrderItem)OrderItemService.createOrderItem(w, oi.getSerializedOrderItemForApi()).getReturnObj();
-		}
-		return parseOrderJson(API.get("/orders/"+apiOrder.getId(), w));
-	}
-	public static WhiplashReturn createOrderWithoutItems(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
-		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiSansItems(), 3000, 3000));
-	}
 	public static Order updateOrder(Whiplash w, Order o){
 		//TODO: this too
 		return o;
