@@ -11,6 +11,7 @@ import org.apache.http.entity.StringEntity;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 import com.grandst.whiplash.constants.OrderStatus;
 
 public class Order {
@@ -371,39 +372,59 @@ public class Order {
 	}
 	
 	public StringEntity getSerializedOrderForApiCreate() throws UnsupportedEncodingException{
+		ApiOrderHolder oh = new ApiOrderHolder();
 		ApiOrder ao = new ApiOrder();
 		ao.shippingName = this.getShippingName();
-		ao.shippingAddress = this.getShippingAddress();
+		ao.shippingAddress1 = this.getShippingAddress();
 		ao.shippingAddress2 = this.getShippingAddress2();
 		ao.shippingCity = this.getShippingCity();
 		ao.shippingState = this.getShippingState();
 		ao.shippingZip = this.getShippingZip();
 		ao.email = this.getEmail();
-		ao.orderItems= new ArrayList<ApiItem>();
+		ao.orderItemsAttributes = new ArrayList<ApiItem>();
 		for(OrderItem i : this.getOrderItems()){
 			ApiItem ai = new ApiItem();
 			ai.quantity = i.getQuantity();
 			ai.itemId = i.getItemId();
-			ao.orderItems.add(ai);
+			ao.orderItemsAttributes.add(ai);
 		}
+		oh.order = ao;
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		Gson gson = gb.create();
-		String jObj = gson.toJson(ao, ApiOrder.class);
+		String jObj = gson.toJson(oh, ApiOrderHolder.class);
+		return new StringEntity(jObj);
+	}
+	public StringEntity getSerializedOrderForApiSansItems() throws UnsupportedEncodingException{
+		ApiOrderHolder oh = new ApiOrderHolder();
+		ApiOrder ao = new ApiOrder();
+		ao.shippingName = this.getShippingName();
+		ao.shippingAddress1 = this.getShippingAddress();
+		ao.shippingAddress2 = this.getShippingAddress2();
+		ao.shippingCity = this.getShippingCity();
+		ao.shippingState = this.getShippingState();
+		ao.shippingZip = this.getShippingZip();
+		ao.email = this.getEmail();
+		oh.order = ao;
+		GsonBuilder gb = new GsonBuilder()
+			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		Gson gson = gb.create();
+		String jObj = gson.toJson(oh, ApiOrderHolder.class);
 		return new StringEntity(jObj);
 	}
 	
 	private class ApiOrder{
 		public ApiOrder(){}
 		private String shippingName;
-		private String shippingAddress;
-		private String shippingAddress2;
+		@SerializedName("shipping_address_1") private String shippingAddress1;
+		@SerializedName("shipping_address_2") private String shippingAddress2;
 		private String shippingCity;
 		private String shippingState;
 		private String shippingZip;
 		private String email;
-		private ArrayList<ApiItem> orderItems;
+		private ArrayList<ApiItem> orderItemsAttributes;
 		
 	}
 	private class ApiItem{
@@ -412,5 +433,10 @@ public class Order {
 		private long itemId;
 		
 	}
+	private class ApiOrderHolder{
+		public ApiOrderHolder(){}
+		private ApiOrder order;
+	}
+	
 
 }

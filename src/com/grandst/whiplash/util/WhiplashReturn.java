@@ -2,6 +2,7 @@ package com.grandst.whiplash.util;
 
 import org.apache.http.ParseException;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -38,6 +39,19 @@ public class WhiplashReturn {
 			JsonObject jObj = parser.parse(apiJson).getAsJsonObject();
 			if(jObj!=null && jObj.has("error")){
 				this.setErrorMsg(jObj.get("error").getAsString());
+				return true;
+			}
+		}catch(IllegalStateException ex){
+			try{
+				JsonParser parser = new JsonParser();
+				JsonArray jObj = parser.parse(apiJson).getAsJsonArray();
+				if(jObj!=null && jObj.size()>0){
+					if(jObj.get(0).getAsJsonObject()!=null && jObj.get(0).getAsJsonObject().has("error")){
+						this.setErrorMsg(jObj.get(0).getAsJsonObject().get("error").getAsString());
+						return true;
+					}
+				}
+			}catch(ParseException ex2){
 				return true;
 			}
 		}catch(ParseException ex){
