@@ -34,10 +34,12 @@ public class WhiplashReturn {
 	}
 	
 	public Boolean tryParseError(String apiJson){
+		if(apiJson!=null && (apiJson.equals("{}") || apiJson.equals("{ }")))
+			return true;
 		try{
 			JsonParser parser = new JsonParser();
 			JsonObject jObj = parser.parse(apiJson).getAsJsonObject();
-			if(jObj!=null && jObj.has("error")){
+			if(jObj!=null && jObj.has("error") ){
 				this.setErrorMsg(jObj.get("error").getAsString());
 				return true;
 			}

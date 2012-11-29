@@ -1,6 +1,7 @@
 package com.grandst.whiplash.api;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -46,13 +47,11 @@ public class OrderService {
 		}
 		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 	}
-	public static Order updateOrder(Whiplash w, Order o){
-		//TODO: this too
-		return o;
+	public static WhiplashReturn updateOrder(Whiplash w, Order o) throws ClientProtocolException, UnsupportedEncodingException, ParseException, IOException{
+		return parseOrderJson(API.put("/orders/"+o.getId(), w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 	}
-	public static Order deleteOrder(Whiplash w, Order o){
-		//TODO: this too
-		return o;
+	public static WhiplashReturn deleteOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
+		return parseOrderJson(API.delete("/orders/"+orderId, w, 3000, 3000));
 	}
 	private static WhiplashReturn parseOrderJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();

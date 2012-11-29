@@ -27,7 +27,13 @@ public class OrderItemService {
 		return parseOrderItemJson(API.get("/order_items/"+orderItemId, w));
 	}
 	public static WhiplashReturn createOrderItem(Whiplash w, StringEntity jsonObj) throws ClientProtocolException, ParseException, IOException{
-		return parseOrderItemJson(API.post("/order_items", w, jsonObj, 3000,30000));
+		return parseOrderItemJson(API.post("/order_items", w, jsonObj, 30000,30000));
+	}
+	public static WhiplashReturn updateOrderItem(Whiplash w, OrderItem or) throws ClientProtocolException, ParseException, IOException{
+		return parseOrderItemJson(API.put("/order_items/"+or.getId(), w, or.getSerializedOrderItemForApi(), 30000,30000));
+	}
+	public static WhiplashReturn deleteOrderItem(Whiplash w, long orderItemId) throws ClientProtocolException, ParseException, IOException{
+		return parseOrderItemJson(API.delete("/order_items/"+orderItemId, w, 10000,10000));
 	}
 	
 	private static WhiplashReturn parseOrderItemListJson(String apiJson) throws  ParseException{

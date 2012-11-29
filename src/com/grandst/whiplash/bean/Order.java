@@ -41,14 +41,14 @@ public class Order {
 	private Boolean trackingSent;
 	private Date updatedAt;
 	private String tracking;
-	private Date ShippedOn;
+	private Date shippedOn;
 	private String shipMethod;
 	
 	private String originiator;
 	private Boolean billed;
 	private BigDecimal shipActualCost;
 	private Boolean originatorNotified;
-	private String originatorId;
+	private long originatorId;
 	private long status;
 	private String orderOrig;
 	private Boolean gift;
@@ -68,7 +68,7 @@ public class Order {
 			Boolean trackingSent, Date updatedAt, String tracking,
 			Date shippedOn, String shipMethod, BigDecimal reqShipMethodPrice,
 			String originiator, Boolean billed, BigDecimal shipActualCost,
-			Boolean originatorNotified, String originatorId, long status,
+			Boolean originatorNotified, long originatorId, long status,
 			String orderOrig, Boolean gift, String publicNote, String email,
 			List<OrderItem> orderItems) {
 		super();
@@ -92,7 +92,7 @@ public class Order {
 		this.trackingSent = trackingSent;
 		this.updatedAt = updatedAt;
 		this.tracking = tracking;
-		ShippedOn = shippedOn;
+		this.shippedOn = shippedOn;
 		this.shipMethod = shipMethod;
 		this.reqShipMethodPrice = reqShipMethodPrice;
 		this.originiator = originiator;
@@ -228,10 +228,10 @@ public class Order {
 		this.tracking = tracking;
 	}
 	public Date getShippedOn() {
-		return ShippedOn;
+		return shippedOn;
 	}
 	public void setShippedOn(Date shippedOn) {
-		ShippedOn = shippedOn;
+		this.shippedOn = shippedOn;
 	}
 	public String getShipMethod() {
 		return shipMethod;
@@ -269,10 +269,10 @@ public class Order {
 	public void setOriginatorNotified(Boolean originatorNotified) {
 		this.originatorNotified = originatorNotified;
 	}
-	public String getOriginatorId() {
+	public long getOriginatorId() {
 		return originatorId;
 	}
-	public void setOriginatorId(String originatorId) {
+	public void setOriginatorId(long originatorId) {
 		this.originatorId = originatorId;
 	}
 	public long getStatus() {
@@ -381,6 +381,7 @@ public class Order {
 		ao.shippingState = this.getShippingState();
 		ao.shippingZip = this.getShippingZip();
 		ao.email = this.getEmail();
+		ao.originatorId = this.getOriginatorId();
 		ao.orderItemsAttributes = new ArrayList<ApiItem>();
 		for(OrderItem i : this.getOrderItems()){
 			ApiItem ai = new ApiItem();
@@ -396,6 +397,7 @@ public class Order {
 		String jObj = gson.toJson(oh, ApiOrderHolder.class);
 		return new StringEntity(jObj);
 	}
+	
 	public StringEntity getSerializedOrderForApiSansItems() throws UnsupportedEncodingException{
 		ApiOrderHolder oh = new ApiOrderHolder();
 		ApiOrder ao = new ApiOrder();
@@ -406,6 +408,7 @@ public class Order {
 		ao.shippingState = this.getShippingState();
 		ao.shippingZip = this.getShippingZip();
 		ao.email = this.getEmail();
+		ao.originatorId = this.getOriginatorId();
 		oh.order = ao;
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -424,6 +427,7 @@ public class Order {
 		private String shippingState;
 		private String shippingZip;
 		private String email;
+		private long originatorId;
 		private ArrayList<ApiItem> orderItemsAttributes;
 		
 	}

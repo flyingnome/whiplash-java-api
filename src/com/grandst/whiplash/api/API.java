@@ -9,7 +9,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -22,7 +21,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.grandst.whiplash.Whiplash;
 
@@ -69,7 +67,6 @@ public final class API {
 		HttpClient client = new DefaultHttpClient(httpParameters); 	
 		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
 		if (jsonObj != null) {
-			//postReq.setHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
 			postReq.setEntity(jsonObj);
 		}
 		setHeaders(postReq,w);
@@ -80,13 +77,26 @@ public final class API {
 	}
 	
 	public static String put(String apiCall, Whiplash w, List<NameValuePair> putData, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException  {
+		if (putData != null) {
+			HashMap<String,String> map = new HashMap<String,String>();
+			for(NameValuePair nvp : putData){
+				 map.put(nvp.getName(),nvp.getValue());
+			}
+			GsonBuilder gb = new GsonBuilder()
+				.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+				.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+			return put(apiCall,w,new StringEntity(gb.create().toJson(map)),timeoutConnection,timeoutSocket);
+		}
+		return null;
+	}
+	public static String put(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException  {
 		HttpParams httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 		HttpClient client = new DefaultHttpClient(httpParameters); 	
 		HttpPut putReq = new HttpPut(w.getApiBaseUrl()+apiCall);
-		if (putData != null) {
-			putReq.setEntity(new UrlEncodedFormEntity(putData));
+		if (jsonObj != null) {
+			putReq.setEntity(jsonObj);
 		}
 		setHeaders(putReq,w);
 		final HttpResponse response = client.execute(putReq);  
