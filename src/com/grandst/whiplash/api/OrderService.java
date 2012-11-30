@@ -32,6 +32,10 @@ public class OrderService {
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
 	public static WhiplashReturn createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
+		WhiplashReturn ret = getOrderByOriginatorId(w,o.getOriginatorId());
+		if(ret.getReturnObj()!=null){ //return the order if it already exists
+			return ret;
+		}
 		for(OrderItem oi : o.getOrderItems()){
 			//check if the item is on the API already
 			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getOriginatorId()).getReturnObj();
