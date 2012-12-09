@@ -34,6 +34,9 @@ public class ItemService {
 	public static WhiplashReturn getItemByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseItemJson(API.get("/items/originator/"+originatorId, w));
 	}
+	public static WhiplashReturn deleteItem(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
+		return parseItemJson(API.delete("/items/"+itemId, w, 3000, 3000));
+	}
 	public static WhiplashReturn createItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException{
 		List<NameValuePair> postData = new ArrayList<NameValuePair>();
     	postData.add(new BasicNameValuePair("sku",i.getSku()));
