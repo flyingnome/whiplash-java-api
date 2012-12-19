@@ -25,7 +25,7 @@ public class Item {
 	private String height;
 	private String width;
 	private String vendor;
-	private long originatorId;
+	private String originatorId;
 	private String description;
 	private Date imageUpdatedAt;
 	
@@ -35,7 +35,7 @@ public class Item {
 			BigDecimal weight, Boolean bundle, BigDecimal wholesaleCost,
 			String originator, Integer expQuantity, String sku,
 			Boolean packaging, String imageOriginatorUrl, String height,
-			String width, String vendor, long originatorId, String description,
+			String width, String vendor, String originatorId, String description,
 			Date imageUpdatedAt) {
 		super();
 		this.id = id;
@@ -225,11 +225,11 @@ public class Item {
 		this.vendor = vendor;
 	}
 
-	public long getOriginatorId() {
+	public String getOriginatorId() {
 		return originatorId;
 	}
 
-	public void setOriginatorId(long originatorId) {
+	public void setOriginatorId(String originatorId) {
 		this.originatorId = originatorId;
 	}
 

@@ -31,7 +31,7 @@ public class ItemService {
 	public static WhiplashReturn getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
 		return parseItemJson(API.get("/items/"+itemId, w));
 	}
-	public static WhiplashReturn getItemByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemByOriginatorId(Whiplash w, String originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseItemJson(API.get("/items/originator/"+originatorId, w));
 	}
 	public static WhiplashReturn deleteItem(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
@@ -44,6 +44,14 @@ public class ItemService {
     	postData.add(new BasicNameValuePair("description",i.getDescription()));
     	postData.add(new BasicNameValuePair("originator_id",""+i.getOriginatorId()));
 		return parseItemJson(API.post("/items", w, postData, 3000,30000));
+	}
+	public static WhiplashReturn updateItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException{
+		List<NameValuePair> postData = new ArrayList<NameValuePair>();
+    	postData.add(new BasicNameValuePair("sku",i.getSku()));
+    	postData.add(new BasicNameValuePair("title",i.getTitle()));
+    	postData.add(new BasicNameValuePair("description",i.getDescription()));
+    	postData.add(new BasicNameValuePair("originator_id",""+i.getOriginatorId()));
+		return parseItemJson(API.put("/items/"+i.getId(), w,postData , 3000, 3000));
 	}
 	
 	private static WhiplashReturn parseItemListJson(String apiJson) throws  ParseException{

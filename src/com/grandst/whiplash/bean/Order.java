@@ -35,12 +35,13 @@ public class Order {
 	
 	private String reqShipMethodCode;
 	private BigDecimal reqShipMethodPrice;
+	private String reqShipMethodText;
 	
 	private String shipNotes;
 	private Date createdAt;
 	private Boolean trackingSent;
 	private Date updatedAt;
-	private String tracking;
+	private List<String> tracking;
 	private Date shippedOn;
 	private String shipMethod;
 	
@@ -48,7 +49,7 @@ public class Order {
 	private Boolean billed;
 	private BigDecimal shipActualCost;
 	private Boolean originatorNotified;
-	private long originatorId;
+	private String originatorId;
 	private long status;
 	private String orderOrig;
 	private Boolean gift;
@@ -65,12 +66,12 @@ public class Order {
 			String ship3rdPartyAccount, String ship3rdPartyCountry,
 			BigDecimal ship3rdPartyCost, String ship3rdPartyZip,
 			String reqShipMethodCode, String shipNotes, Date createdAt,
-			Boolean trackingSent, Date updatedAt, String tracking,
+			Boolean trackingSent, Date updatedAt, List<String> tracking,
 			Date shippedOn, String shipMethod, BigDecimal reqShipMethodPrice,
 			String originiator, Boolean billed, BigDecimal shipActualCost,
-			Boolean originatorNotified, long originatorId, long status,
+			Boolean originatorNotified, String originatorId, long status,
 			String orderOrig, Boolean gift, String publicNote, String email,
-			List<OrderItem> orderItems) {
+			List<OrderItem> orderItems, String reqShipMethodText) {
 		super();
 		this.id = id;
 		this.shippingName = shippingName;
@@ -106,6 +107,7 @@ public class Order {
 		this.publicNote = publicNote;
 		this.email = email;
 		this.orderItems = orderItems;
+		this.reqShipMethodText = reqShipMethodText;
 	}	
 	public long getId() {
 		return id;
@@ -221,10 +223,10 @@ public class Order {
 	public void setUpdatedAt(Date updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	public String getTracking() {
+	public List<String> getTracking() {
 		return tracking;
 	}
-	public void setTracking(String tracking) {
+	public void setTracking(List<String> tracking) {
 		this.tracking = tracking;
 	}
 	public Date getShippedOn() {
@@ -269,10 +271,10 @@ public class Order {
 	public void setOriginatorNotified(Boolean originatorNotified) {
 		this.originatorNotified = originatorNotified;
 	}
-	public long getOriginatorId() {
+	public String getOriginatorId() {
 		return originatorId;
 	}
-	public void setOriginatorId(long originatorId) {
+	public void setOriginatorId(String originatorId) {
 		this.originatorId = originatorId;
 	}
 	public long getStatus() {
@@ -310,6 +312,13 @@ public class Order {
 	}
 	public void setOrderItems(List<OrderItem> orderItems) {
 		this.orderItems = orderItems;
+	}
+	public String getReqShipMethodText() {
+		return reqShipMethodText;
+	}
+
+	public void setReqShipMethodText(String reqShipMethodText) {
+		this.reqShipMethodText = reqShipMethodText;
 	}
 	//for display purps
 	public String getShippingString(){
@@ -382,7 +391,10 @@ public class Order {
 		ao.shippingZip = this.getShippingZip();
 		ao.email = this.getEmail();
 		ao.originatorId = this.getOriginatorId();
+		ao.reqShipMethodCode = this.getReqShipMethodCode();
+		ao.reqShipMethodText = this.getReqShipMethodText();
 		ao.orderItemsAttributes = new ArrayList<ApiItem>();
+		ao.tracking = this.getTracking();
 		for(OrderItem i : this.getOrderItems()){
 			ApiItem ai = new ApiItem();
 			ai.quantity = i.getQuantity();
@@ -409,6 +421,7 @@ public class Order {
 		ao.shippingZip = this.getShippingZip();
 		ao.email = this.getEmail();
 		ao.originatorId = this.getOriginatorId();
+		ao.tracking = this.getTracking();
 		oh.order = ao;
 		GsonBuilder gb = new GsonBuilder()
 			.setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -427,7 +440,10 @@ public class Order {
 		private String shippingState;
 		private String shippingZip;
 		private String email;
-		private long originatorId;
+		private String originatorId;
+		private List<String> tracking;
+		@SerializedName("req_ship_method_code") private String reqShipMethodCode;
+		@SerializedName("req_ship_method_text") private String reqShipMethodText;
 		private ArrayList<ApiItem> orderItemsAttributes;
 		
 	}
@@ -437,6 +453,7 @@ public class Order {
 		private long itemId;
 		
 	}
+
 	private class ApiOrderHolder{
 		public ApiOrderHolder(){}
 		private ApiOrder order;

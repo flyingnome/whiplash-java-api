@@ -14,7 +14,7 @@ public class OrderItem {
 	public OrderItem(long id, BigDecimal price, Date createdAt,
 			Boolean unshippable, Boolean available, Integer quantity,
 			Date updatedAt, Integer packed, Integer picked, Boolean packaging,
-			String sku, String description, long originatorId, long itemId) {
+			String sku, String description, String originatorId, long itemId) {
 		super();
 		this.id = id;
 		this.price = price;
@@ -46,7 +46,7 @@ public class OrderItem {
 	private Boolean packaging;
 	private String sku;
 	private String description;
-	private long originatorId;
+	private String originatorId;
 	private long itemId;
 	private long orderId;
 	private String title;
@@ -131,10 +131,10 @@ public class OrderItem {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public long getOriginatorId() {
+	public String getOriginatorId() {
 		return originatorId;
 	}
-	public void setOriginatorId(long originatorId) {
+	public void setOriginatorId(String originatorId) {
 		this.originatorId = originatorId;
 	}
 	public long getItemId() {

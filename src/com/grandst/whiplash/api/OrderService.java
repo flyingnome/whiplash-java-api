@@ -28,7 +28,7 @@ public class OrderService {
 	public static WhiplashReturn getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderJson(API.get("/orders/"+orderId, w));
 	}
-	public static WhiplashReturn getOrderByOriginatorId(Whiplash w, long originatorId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrderByOriginatorId(Whiplash w, String originatorId) throws ClientProtocolException, ParseException, IOException{
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
 	public static WhiplashReturn createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
@@ -38,13 +38,13 @@ public class OrderService {
 		}
 		for(OrderItem oi : o.getOrderItems()){
 			//check if the item is on the API already
-			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getOriginatorId()).getReturnObj();
+			Item i =  (Item)ItemService.getItemByOriginatorId(w, oi.getSku()).getReturnObj();
 			if(i==null || i.getId()<=0){ //it's not so create it
 				i = new Item();
 				i.setSku(oi.getSku());
 				i.setTitle(oi.getTitle());
 				i.setDescription(oi.getDescription());
-				i.setOriginatorId(oi.getOriginatorId());
+				i.setOriginatorId(oi.getSku());
 				i = (Item)ItemService.createItem(w, i).getReturnObj();
 			}
 			oi.setItemId(i.getId());
