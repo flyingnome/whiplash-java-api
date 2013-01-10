@@ -7,14 +7,14 @@ Simple Java API library for [Whiplash](https://www.whiplashmerch.com/), you can 
 export project as .jar and add to your libs
 
 ### Usage
-create a whiplash object using only your API key
+#### create a whiplash object using only your API key
         Whiplash w = new Whiplash("apiKey"); 
 OR
 
-with an optional bool to tell the object to use the testing environment, if the apiKey is an empty string it will use the shared test apiKey
+##### with an optional bool to tell the object to use the testing environment, if the apiKey is an empty string it will use the shared test apiKey
         Whiplash w = new Whiplash("apiKey",true);
         
-sample get
+#### sample get
       	ArrayList<Order> orders = OrderService.getOrders(w).getReturnObj();
     		if(orders!=null){
     			print "Got Orders from Whiplash ===== " + orders.size();
@@ -24,7 +24,8 @@ sample get
     				}
     			}
     		}
-sample order create
+
+#### sample order create
 
         ArrayList<OrderItem> whiplashOrderItems = new ArrayList<OrderItem>();
         OrderItem wOi = new OrderItem(
