@@ -389,6 +389,7 @@ public class Order {
 		ao.shippingCity = this.getShippingCity();
 		ao.shippingState = this.getShippingState();
 		ao.shippingZip = this.getShippingZip();
+		ao.shippingCountry = this.getShippingCountry();
 		ao.email = this.getEmail();
 		ao.originatorId = this.getOriginatorId();
 		ao.reqShipMethodCode = this.getReqShipMethodCode();
@@ -419,6 +420,7 @@ public class Order {
 		ao.shippingCity = this.getShippingCity();
 		ao.shippingState = this.getShippingState();
 		ao.shippingZip = this.getShippingZip();
+		ao.shippingCountry = this.getShippingCountry();
 		ao.email = this.getEmail();
 		ao.originatorId = this.getOriginatorId();
 		ao.tracking = this.getTracking();
@@ -439,6 +441,7 @@ public class Order {
 		private String shippingCity;
 		private String shippingState;
 		private String shippingZip;
+		private String shippingCountry;
 		private String email;
 		private String originatorId;
 		private List<String> tracking;
