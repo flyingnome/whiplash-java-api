@@ -68,7 +68,7 @@ OR
     				,new Date()
     				,null
     				,null
-    				,grandstToWhiplashShipping(gOrder.getShippingOption().getId())
+    				,"USPS Priority Mail"
     				,null //req shipmethodprice
     				,null
     				,false
