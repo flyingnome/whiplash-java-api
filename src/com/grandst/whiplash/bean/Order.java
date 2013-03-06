@@ -384,6 +384,7 @@ public class Order {
 		ApiOrderHolder oh = new ApiOrderHolder();
 		ApiOrder ao = new ApiOrder();
 		ao.shippingName = this.getShippingName();
+		ao.shippingCompany = this.getShippingCompany();
 		ao.shippingAddress1 = this.getShippingAddress();
 		ao.shippingAddress2 = this.getShippingAddress2();
 		ao.shippingCity = this.getShippingCity();
@@ -415,6 +416,7 @@ public class Order {
 		ApiOrderHolder oh = new ApiOrderHolder();
 		ApiOrder ao = new ApiOrder();
 		ao.shippingName = this.getShippingName();
+		ao.shippingCompany = this.getShippingCompany();
 		ao.shippingAddress1 = this.getShippingAddress();
 		ao.shippingAddress2 = this.getShippingAddress2();
 		ao.shippingCity = this.getShippingCity();
@@ -436,6 +438,7 @@ public class Order {
 	private class ApiOrder{
 		public ApiOrder(){}
 		private String shippingName;
+		private String shippingCompany;
 		@SerializedName("shipping_address_1") private String shippingAddress1;
 		@SerializedName("shipping_address_2") private String shippingAddress2;
 		private String shippingCity;
