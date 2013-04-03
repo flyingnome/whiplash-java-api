@@ -1,6 +1,7 @@
 package com.grandst.whiplash.api;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -20,19 +21,19 @@ import com.grandst.whiplash.util.WhiplashReturn;
 
 public class OrderItemService {
 	
-	public static WhiplashReturn getOrderItems(Whiplash w) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrderItems(Whiplash w) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderItemListJson(API.get("/order_items.json/", w));
 	}
-	public static WhiplashReturn getOrderItemById(Whiplash w, long orderItemId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrderItemById(Whiplash w, long orderItemId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderItemJson(API.get("/order_items/"+orderItemId, w));
 	}
-	public static WhiplashReturn createOrderItem(Whiplash w, StringEntity jsonObj) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn createOrderItem(Whiplash w, StringEntity jsonObj) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderItemJson(API.post("/order_items", w, jsonObj, 30000,30000));
 	}
-	public static WhiplashReturn updateOrderItem(Whiplash w, OrderItem or) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn updateOrderItem(Whiplash w, OrderItem or) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderItemJson(API.put("/order_items/"+or.getId(), w, or.getSerializedOrderItemForApi(), 30000,30000));
 	}
-	public static WhiplashReturn deleteOrderItem(Whiplash w, long orderItemId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn deleteOrderItem(Whiplash w, long orderItemId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderItemJson(API.delete("/order_items/"+orderItemId, w, 10000,10000));
 	}
 	

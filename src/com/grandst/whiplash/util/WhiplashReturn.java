@@ -34,7 +34,7 @@ public class WhiplashReturn {
 	}
 	
 	public Boolean tryParseError(String apiJson){
-		if(apiJson!=null && (apiJson.equals("{}") || apiJson.equals("{ }")))
+		if(apiJson!=null && (apiJson.equals("{}") || apiJson.equals("{ }") || !(apiJson.startsWith("{") || apiJson.startsWith("[")))) //break out if its not Json or its empty
 			return true;
 		try{
 			JsonParser parser = new JsonParser();
