@@ -59,6 +59,8 @@ public class ItemService {
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
 			return retObj;
+		if(retObj.tryParseStatus(apiJson))
+			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Item> retList = new ArrayList<Item>();
 		JsonParser parser = new JsonParser();
@@ -79,6 +81,8 @@ public class ItemService {
 	private static WhiplashReturn parseItemJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();

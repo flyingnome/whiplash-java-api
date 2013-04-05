@@ -68,9 +68,10 @@ public final class API {
 						,null
 					).toASCIIString());
 		setHeaders(getReq, w);
-		final HttpResponse response = client.execute(getReq);  
-		InputStream inputStream;
-		inputStream = response.getEntity().getContent();		
+		final HttpResponse response = client.execute(getReq);
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
+		InputStream inputStream = response.getEntity().getContent();		
 		return inputStreamToString(inputStream);
 	}
 	
@@ -100,8 +101,9 @@ public final class API {
 		}
 		setHeaders(postReq,w);
 		final HttpResponse response = client.execute(postReq);  
-		InputStream inputStream;
-		inputStream = response.getEntity().getContent();		
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
+		InputStream inputStream = response.getEntity().getContent();		
 		return inputStreamToString(inputStream);
 	}
 	public static String post(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException {
@@ -126,6 +128,8 @@ public final class API {
 		inputStream = response.getEntity().getContent();		
 		return inputStreamToString(inputStream);
 	}
+	
+	//VERB::PUT
 	public static String put(String apiCall, Whiplash w, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException  {
 		return put(apiCall,w,new StringEntity(""),timeoutConnection,timeoutSocket);
 	}
@@ -159,11 +163,16 @@ public final class API {
 			putReq.setEntity(jsonObj);
 		}
 		setHeaders(putReq,w);
-		final HttpResponse response = client.execute(putReq);  
+		final HttpResponse response = client.execute(putReq);
+		//this block is a quick fix for the API returning codes
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
 		InputStream inputStream = response.getEntity().getContent();
 		return inputStreamToString(inputStream);	 
+
 	}
 	
+	//VERB::DELETE
 	public static String delete(String apiCall, Whiplash w,int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException  {
 		HttpParams httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
@@ -178,11 +187,15 @@ public final class API {
 						,null
 					).toASCIIString());
 		setHeaders(delReq,w);
-		final HttpResponse response = client.execute(delReq);  
+		final HttpResponse response = client.execute(delReq);
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
 		InputStream inputStream = response.getEntity().getContent();
 		return inputStreamToString(inputStream);
 	}
 	
+	
+	//UTILS
 	private static String inputStreamToString(InputStream is) throws IOException{
 		byte[] data = new byte[512];
 		int len = 0;
@@ -193,6 +206,14 @@ public final class API {
 		}
 		is.close();
 		return buffer.toString();	
+	}
+	private static String getStatusCodeJson(int code) throws IOException{
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		sb.append("status:");
+		sb.append(code);
+		sb.append("}");
+		return 	sb.toString();
 	}
 	
 	private static void setHeaders(HttpRequestBase req, Whiplash w){

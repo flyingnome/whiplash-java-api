@@ -70,18 +70,20 @@ public class OrderService {
 		return parseOrderJson(API.delete("/orders/"+orderId, w, 3000, 3000));
 	}
 	public static WhiplashReturn cancelOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
-		return parseOrderJson(API.put(String.format("/orders/%/%",orderId,"cancel"), w, 3000, 3000));
+		return parseOrderJson(API.put(String.format("/orders/%s/%s",orderId,"cancel"), w, 3000, 3000));
 	}
 	public static WhiplashReturn pauseOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
-		return parseOrderJson(API.put(String.format("/orders/%/%",orderId,"pause"), w, 3000, 3000));
+		return parseOrderJson(API.put(String.format("/orders/%s/%s",orderId,"pause"), w, 3000, 3000));
 	}
 	public static WhiplashReturn releaseOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
-		return parseOrderJson(API.put(String.format("/orders/%/%",orderId,"release"), w, 3000, 3000));
+		return parseOrderJson(API.put(String.format("/orders/%s/%s",orderId,"release"), w, 3000, 3000));
 	}
 	
 	private static WhiplashReturn parseOrderJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();
@@ -107,6 +109,8 @@ public class OrderService {
 	private static WhiplashReturn parseOrderListJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();

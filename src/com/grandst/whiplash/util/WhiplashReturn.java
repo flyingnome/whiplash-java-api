@@ -13,7 +13,14 @@ public class WhiplashReturn {
 	private Object returnObj;
 	private String apiMsg;
 	private String errorMsg;
+	private int status;
 	
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
+	}
 	public Object getReturnObj() {
 		return returnObj;
 	}
@@ -56,6 +63,24 @@ public class WhiplashReturn {
 			}catch(ParseException ex2){
 				return true;
 			}
+		}catch(ParseException ex){
+			return true;
+		}
+		return false;
+	}
+	
+	public Boolean tryParseStatus(String apiJson){
+		if(apiJson!=null && (apiJson.equals("{}") || apiJson.equals("{ }") || !(apiJson.startsWith("{") || apiJson.startsWith("[")))) //break out if its not Json or its empty
+			return true;
+		try{
+			JsonParser parser = new JsonParser();
+			JsonObject jObj = parser.parse(apiJson).getAsJsonObject();
+			if(jObj!=null && jObj.has("status") ){
+				this.setStatus(jObj.get("status").getAsInt());
+				return true;
+			}
+		}catch(IllegalStateException ex){
+			return true;
 		}catch(ParseException ex){
 			return true;
 		}
