@@ -210,7 +210,7 @@ public final class API {
 	private static String getStatusCodeJson(int code) throws IOException{
 		StringBuilder sb = new StringBuilder();
 		sb.append("{");
-		sb.append("status:");
+		sb.append("httpstatus:");
 		sb.append(code);
 		sb.append("}");
 		return 	sb.toString();

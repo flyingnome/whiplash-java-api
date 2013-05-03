@@ -75,12 +75,23 @@ public class WhiplashReturn {
 		try{
 			JsonParser parser = new JsonParser();
 			JsonObject jObj = parser.parse(apiJson).getAsJsonObject();
-			if(jObj!=null && jObj.has("status") ){
-				this.setStatus(jObj.get("status").getAsInt());
+			if(jObj!=null && jObj.has("httpstatus") ){
+				this.setStatus(jObj.get("httpstatus").getAsInt());
 				return true;
 			}
 		}catch(IllegalStateException ex){
-			return true;
+			try{
+				JsonParser parser = new JsonParser();
+				JsonArray jObj = parser.parse(apiJson).getAsJsonArray();
+				if(jObj!=null && jObj.size()>0){
+					if(jObj.get(0).getAsJsonObject()!=null && jObj.get(0).getAsJsonObject().has("httpstatus")){
+						this.setStatus(jObj.get(0).getAsJsonObject().get("httpstatus").getAsInt());
+						return true;
+					}
+				}
+			}catch(ParseException ex2){
+				return true;
+			}
 		}catch(ParseException ex){
 			return true;
 		}
