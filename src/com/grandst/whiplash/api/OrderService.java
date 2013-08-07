@@ -2,6 +2,7 @@ package com.grandst.whiplash.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -17,21 +18,32 @@ import com.grandst.whiplash.Whiplash;
 import com.grandst.whiplash.bean.Item;
 import com.grandst.whiplash.bean.Order;
 import com.grandst.whiplash.bean.OrderItem;
+import com.grandst.whiplash.constants.OrderStatus;
 import com.grandst.whiplash.util.JsonCleaner;
 import com.grandst.whiplash.util.WhiplashReturn;
 
 public class OrderService {
 	
-	public static WhiplashReturn getOrders(Whiplash w) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrders(Whiplash w) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderListJson(API.get("/orders.json", w));
 	}
-	public static WhiplashReturn getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrdersByStatus(Whiplash w, long status) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		StringBuilder query = new StringBuilder();
+		query
+			.append("status=")
+			.append(status)
+			.append("&")
+			.append("limit=")
+			.append("50");
+		return parseOrderListJson(API.get("/orders.json", w,query.toString()));
+	}
+	public static WhiplashReturn getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderJson(API.get("/orders/"+orderId, w));
 	}
-	public static WhiplashReturn getOrderByOriginatorId(Whiplash w, String originatorId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getOrderByOriginatorId(Whiplash w, String originatorId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderJson(API.get("/orders/originator/"+originatorId, w));
 	}
-	public static WhiplashReturn createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn createNewOrder(Whiplash w, Order o) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		WhiplashReturn ret = getOrderByOriginatorId(w,o.getOriginatorId());
 		if(ret.getReturnObj()!=null){ //return the order if it already exists
 			return ret;
@@ -51,15 +63,27 @@ public class OrderService {
 		}
 		return parseOrderJson(API.post("/orders", w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 	}
-	public static WhiplashReturn updateOrder(Whiplash w, Order o) throws ClientProtocolException, UnsupportedEncodingException, ParseException, IOException{
+	public static WhiplashReturn updateOrder(Whiplash w, Order o) throws ClientProtocolException, UnsupportedEncodingException, ParseException, IOException, URISyntaxException{
 		return parseOrderJson(API.put("/orders/"+o.getId(), w, o.getSerializedOrderForApiCreate(), 3000, 3000));
 	}
-	public static WhiplashReturn deleteOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn deleteOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseOrderJson(API.delete("/orders/"+orderId, w, 3000, 3000));
 	}
+	public static WhiplashReturn cancelOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		return parseOrderJson(API.put(String.format("/orders/%s/%s",orderId,"cancel"), w, 3000, 3000));
+	}
+	public static WhiplashReturn pauseOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		return parseOrderJson(API.put(String.format("/orders/%s/%s",orderId,"pause"), w, 3000, 3000));
+	}
+	public static WhiplashReturn releaseOrder(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		return parseOrderJson(API.put(String.format("/orders/%s/%s",orderId,"release"), w, 3000, 3000));
+	}
+	
 	private static WhiplashReturn parseOrderJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();
@@ -85,6 +109,8 @@ public class OrderService {
 	private static WhiplashReturn parseOrderListJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Order> retList = new ArrayList<Order>();

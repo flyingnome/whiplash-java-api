@@ -1,6 +1,7 @@
 package com.grandst.whiplash.api;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,22 +23,22 @@ import com.grandst.whiplash.util.WhiplashReturn;
 
 public class ItemService {
 	
-	public static WhiplashReturn getItems(Whiplash w) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItems(Whiplash w) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemListJson(API.get("/items.json/", w));
 	}
-	public static WhiplashReturn getItemsBySku(Whiplash w, String sku) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemsBySku(Whiplash w, String sku) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemListJson(API.get("/items/sku/"+sku, w));
 	}
-	public static WhiplashReturn getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemJson(API.get("/items/"+itemId, w));
 	}
-	public static WhiplashReturn getItemByOriginatorId(Whiplash w, String originatorId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn getItemByOriginatorId(Whiplash w, String originatorId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemJson(API.get("/items/originator/"+originatorId, w));
 	}
-	public static WhiplashReturn deleteItem(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn deleteItem(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemJson(API.delete("/items/"+itemId, w, 3000, 3000));
 	}
-	public static WhiplashReturn createItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn createItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		List<NameValuePair> postData = new ArrayList<NameValuePair>();
     	postData.add(new BasicNameValuePair("sku",i.getSku()));
     	postData.add(new BasicNameValuePair("title",i.getTitle()));
@@ -45,7 +46,7 @@ public class ItemService {
     	postData.add(new BasicNameValuePair("originator_id",""+i.getOriginatorId()));
 		return parseItemJson(API.post("/items", w, postData, 3000,30000));
 	}
-	public static WhiplashReturn updateItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException{
+	public static WhiplashReturn updateItem(Whiplash w, Item i) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		List<NameValuePair> postData = new ArrayList<NameValuePair>();
     	postData.add(new BasicNameValuePair("sku",i.getSku()));
     	postData.add(new BasicNameValuePair("title",i.getTitle()));
@@ -57,6 +58,8 @@ public class ItemService {
 	private static WhiplashReturn parseItemListJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		ArrayList<Item> retList = new ArrayList<Item>();
@@ -78,6 +81,8 @@ public class ItemService {
 	private static WhiplashReturn parseItemJson(String apiJson) throws  ParseException{
 		WhiplashReturn retObj = new WhiplashReturn();
 		if(retObj.tryParseError(apiJson))
+			return retObj;
+		if(retObj.tryParseStatus(apiJson))
 			return retObj;
 		apiJson = JsonCleaner.cleanDateFormat(apiJson); // ugh! only Java 7+ supports date formats with Timezone X eg. yyyy-MM-dd'T'HH:mm:ssX so we need to change the format to yyyy-MM-dd'T'HH:mm:ssZ
 		JsonParser parser = new JsonParser();

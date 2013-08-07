@@ -3,6 +3,8 @@ package com.grandst.whiplash.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -50,23 +52,43 @@ import com.grandst.whiplash.Whiplash;
 
 public final class API {
 	
-	public static String get(String apiCall, Whiplash w) throws ClientProtocolException, IOException {
+	//VERB::GET
+	public static String get(String apiCall, Whiplash w) throws ClientProtocolException, IOException, URISyntaxException {
+		return get(apiCall,w,null);
+	}
+	
+	public static String get(String apiCall, Whiplash w, String query) throws ClientProtocolException, IOException, URISyntaxException {
 		HttpClient client = getNewHttpClient(null);
-		HttpGet getReq = new HttpGet(w.getApiBaseUrl()+apiCall);
+		HttpGet getReq = new HttpGet(
+				new URI(
+						w.getScheme()
+						,w.getHost()
+						,w.getApiPath()+apiCall
+						,query
+						,null
+					).toASCIIString());
 		setHeaders(getReq, w);
-		
-		final HttpResponse response = client.execute(getReq);  
-		InputStream inputStream;
-		inputStream = response.getEntity().getContent();		
+		final HttpResponse response = client.execute(getReq);
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
+		InputStream inputStream = response.getEntity().getContent();		
 		return inputStreamToString(inputStream);
 	}
 	
-	public static String post(String apiCall, Whiplash w, List<NameValuePair> postData, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException {
+	//VERB::POST
+	public static String post(String apiCall, Whiplash w, List<NameValuePair> postData, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException {
 		HttpParams httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 		HttpClient client =  getNewHttpClient(httpParameters); 	
-		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
+		HttpPost postReq = new HttpPost(
+				new URI(
+						w.getScheme()
+						,w.getHost()
+						,w.getApiPath()+apiCall
+						,null
+						,null
+					).toASCIIString());
 		if (postData != null) {
 			HashMap<String,String> map = new HashMap<String,String>();
 			for(NameValuePair nvp : postData){
@@ -79,16 +101,24 @@ public final class API {
 		}
 		setHeaders(postReq,w);
 		final HttpResponse response = client.execute(postReq);  
-		InputStream inputStream;
-		inputStream = response.getEntity().getContent();		
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
+		InputStream inputStream = response.getEntity().getContent();		
 		return inputStreamToString(inputStream);
 	}
-	public static String post(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException {
+	public static String post(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException {
 		HttpParams httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 		HttpClient client =  getNewHttpClient(httpParameters); 	 	
-		HttpPost postReq = new HttpPost(w.getApiBaseUrl()+apiCall);
+		HttpPost postReq = new HttpPost(
+				new URI(
+						w.getScheme()
+						,w.getHost()
+						,w.getApiPath()+apiCall
+						,null
+						,null
+					).toASCIIString());
 		if (jsonObj != null) {
 			postReq.setEntity(jsonObj);
 		}
@@ -99,7 +129,11 @@ public final class API {
 		return inputStreamToString(inputStream);
 	}
 	
-	public static String put(String apiCall, Whiplash w, List<NameValuePair> putData, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException  {
+	//VERB::PUT
+	public static String put(String apiCall, Whiplash w, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException  {
+		return put(apiCall,w,new StringEntity(""),timeoutConnection,timeoutSocket);
+	}
+	public static String put(String apiCall, Whiplash w, List<NameValuePair> putData, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException  {
 		if (putData != null) {
 			HashMap<String,String> map = new HashMap<String,String>();
 			for(NameValuePair nvp : putData){
@@ -112,33 +146,56 @@ public final class API {
 		}
 		return null;
 	}
-	public static String put(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException  {
+	public static String put(String apiCall, Whiplash w, StringEntity jsonObj, int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException  {
 		HttpParams httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 		HttpClient client =  getNewHttpClient(httpParameters); 	 	
-		HttpPut putReq = new HttpPut(w.getApiBaseUrl()+apiCall);
+		HttpPut putReq = new HttpPut(
+				new URI(
+						w.getScheme()
+						,w.getHost()
+						,w.getApiPath()+apiCall
+						,null
+						,null
+					).toASCIIString());
 		if (jsonObj != null) {
 			putReq.setEntity(jsonObj);
 		}
 		setHeaders(putReq,w);
-		final HttpResponse response = client.execute(putReq);  
+		final HttpResponse response = client.execute(putReq);
+		//this block is a quick fix for the API returning codes
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
 		InputStream inputStream = response.getEntity().getContent();
 		return inputStreamToString(inputStream);	 
+
 	}
 	
-	public static String delete(String apiCall, Whiplash w,int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException  {
+	//VERB::DELETE
+	public static String delete(String apiCall, Whiplash w,int timeoutConnection,int timeoutSocket) throws ClientProtocolException, IOException, URISyntaxException  {
 		HttpParams httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 		HttpClient client =  getNewHttpClient(httpParameters); 	 
-		HttpDelete delReq = new HttpDelete(w.getApiBaseUrl()+apiCall);
+		HttpDelete delReq = new HttpDelete(
+				new URI(
+						w.getScheme()
+						,w.getHost()
+						,w.getApiPath()+apiCall
+						,null
+						,null
+					).toASCIIString());
 		setHeaders(delReq,w);
-		final HttpResponse response = client.execute(delReq);  
+		final HttpResponse response = client.execute(delReq);
+		if(response.getStatusLine().getStatusCode() != 200)
+			return getStatusCodeJson(response.getStatusLine().getStatusCode());
 		InputStream inputStream = response.getEntity().getContent();
 		return inputStreamToString(inputStream);
 	}
 	
+	
+	//UTILS
 	private static String inputStreamToString(InputStream is) throws IOException{
 		byte[] data = new byte[512];
 		int len = 0;
@@ -149,6 +206,14 @@ public final class API {
 		}
 		is.close();
 		return buffer.toString();	
+	}
+	private static String getStatusCodeJson(int code) throws IOException{
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		sb.append("httpstatus:");
+		sb.append(code);
+		sb.append("}");
+		return 	sb.toString();
 	}
 	
 	private static void setHeaders(HttpRequestBase req, Whiplash w){
