@@ -2,6 +2,7 @@ package com.grandst.whiplash.bean;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -455,14 +456,14 @@ public class Order {
 	public StringEntity getSerializedOrderForApiSansItems() throws UnsupportedEncodingException{
 		ApiOrderHolder oh = new ApiOrderHolder();
 		ApiOrder ao = new ApiOrder();
-		ao.shippingName = URLEncoder.encode(this.getShippingName());
-		ao.shippingCompany = URLEncoder.encode(this.getShippingCompany());
-		ao.shippingAddress1 = URLEncoder.encode(this.getShippingAddress());
-		ao.shippingAddress2 = URLEncoder.encode(this.getShippingAddress2());
-		ao.shippingCity = URLEncoder.encode(this.getShippingCity());
-		ao.shippingState = URLEncoder.encode(this.getShippingState());
-		ao.shippingZip = URLEncoder.encode(this.getShippingZip());
-		ao.shippingCountry = URLEncoder.encode(this.getShippingCountry());
+		ao.shippingName = URLEncoder.encode(this.getShippingName(), "UTF-8");
+		ao.shippingCompany = URLEncoder.encode(this.getShippingCompany(), "UTF-8");
+		ao.shippingAddress1 = URLEncoder.encode(this.getShippingAddress(), "UTF-8");
+		ao.shippingAddress2 = URLEncoder.encode(this.getShippingAddress2(), "UTF-8");
+		ao.shippingCity = URLEncoder.encode(this.getShippingCity(), "UTF-8");
+		ao.shippingState = URLEncoder.encode(this.getShippingState(), "UTF-8");
+		ao.shippingZip = URLEncoder.encode(this.getShippingZip(), "UTF-8");
+		ao.shippingCountry = URLEncoder.encode(this.getShippingCountry(), "UTF-8");
 		ao.email = this.getEmail();
 		ao.originatorId = this.getOriginatorId();
 		ao.tracking = this.getTracking();
