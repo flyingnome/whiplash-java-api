@@ -47,7 +47,6 @@ public class Order {
 	
 	private String originiator;
 	private Boolean billed;
-	private BigDecimal shipActualCost;
 	private Boolean originatorNotified;
 	private String originatorId;
 	private long status;
@@ -56,6 +55,14 @@ public class Order {
 	private String publicNote;
 	private String email;
 	private List<OrderItem> orderItems;
+
+
+    //specific shipping pricing information
+    private BigDecimal packFeeActual;
+    private BigDecimal packingFeeActual;
+    private BigDecimal pickFeeActual;
+    private BigDecimal shipActualCost;
+    private BigDecimal totalFeeActual;
 	
 	public Order(){}
 	
@@ -320,7 +327,40 @@ public class Order {
 	public void setReqShipMethodText(String reqShipMethodText) {
 		this.reqShipMethodText = reqShipMethodText;
 	}
-	//for display purps
+
+    public BigDecimal getPackFeeActual() {
+        return packFeeActual;
+    }
+
+    public void setPackFeeActual(BigDecimal packFeeActual) {
+        this.packFeeActual = packFeeActual;
+    }
+
+    public BigDecimal getPackingFeeActual() {
+        return packingFeeActual;
+    }
+
+    public void setPackingFeeActual(BigDecimal packingFeeActual) {
+        this.packingFeeActual = packingFeeActual;
+    }
+
+    public BigDecimal getPickFeeActual() {
+        return pickFeeActual;
+    }
+
+    public void setPickFeeActual(BigDecimal pickFeeActual) {
+        this.pickFeeActual = pickFeeActual;
+    }
+
+    public BigDecimal getTotalFeeActual() {
+        return totalFeeActual;
+    }
+
+    public void setTotalFeeActual(BigDecimal totalFeeActual) {
+        this.totalFeeActual = totalFeeActual;
+    }
+
+    //for display purps
 	public String getShippingString(){
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getShippingAddress());
@@ -415,14 +455,14 @@ public class Order {
 	public StringEntity getSerializedOrderForApiSansItems() throws UnsupportedEncodingException{
 		ApiOrderHolder oh = new ApiOrderHolder();
 		ApiOrder ao = new ApiOrder();
-		ao.shippingName = this.getShippingName();
-		ao.shippingCompany = this.getShippingCompany();
-		ao.shippingAddress1 = this.getShippingAddress();
-		ao.shippingAddress2 = this.getShippingAddress2();
-		ao.shippingCity = this.getShippingCity();
-		ao.shippingState = this.getShippingState();
-		ao.shippingZip = this.getShippingZip();
-		ao.shippingCountry = this.getShippingCountry();
+		ao.shippingName = URLEncoder.encode(this.getShippingName());
+		ao.shippingCompany = URLEncoder.encode(this.getShippingCompany());
+		ao.shippingAddress1 = URLEncoder.encode(this.getShippingAddress());
+		ao.shippingAddress2 = URLEncoder.encode(this.getShippingAddress2());
+		ao.shippingCity = URLEncoder.encode(this.getShippingCity());
+		ao.shippingState = URLEncoder.encode(this.getShippingState());
+		ao.shippingZip = URLEncoder.encode(this.getShippingZip());
+		ao.shippingCountry = URLEncoder.encode(this.getShippingCountry());
 		ao.email = this.getEmail();
 		ao.originatorId = this.getOriginatorId();
 		ao.tracking = this.getTracking();
