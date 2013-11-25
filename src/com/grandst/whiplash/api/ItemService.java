@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -28,6 +29,16 @@ public class ItemService {
 	}
 	public static WhiplashReturn getItemsBySku(Whiplash w, String sku) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemListJson(API.get("/items/sku/"+sku, w));
+	}
+	public static WhiplashReturn getItemsWithParams(Whiplash w, Map<String,Object> params) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		StringBuilder sb = new StringBuilder();
+		for(Map.Entry<String, Object> entry : params.entrySet()){
+			sb.append(entry.getKey());
+			sb.append("=");
+			sb.append(entry.getValue());
+			sb.append("&");
+		}
+		return parseItemListJson(API.get("/items.json", w, sb.toString()));
 	}
 	public static WhiplashReturn getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemJson(API.get("/items/"+itemId, w));
