@@ -34,7 +34,20 @@ public class OrderService {
 			.append(status)
 			.append("&")
 			.append("limit=")
-			.append("50");
+			.append("250");
+		return parseOrderListJson(API.get("/orders.json", w,query.toString()));
+	}
+	public static WhiplashReturn getOrdersWithStatusAndPage(Whiplash w, long page,long status) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		StringBuilder query = new StringBuilder();
+		query
+			.append("page=")
+			.append(page)
+			.append("&")
+			.append("status=")
+			.append(status)
+			.append("&")
+			.append("limit=")
+			.append("250");
 		return parseOrderListJson(API.get("/orders.json", w,query.toString()));
 	}
 	public static WhiplashReturn getOrderById(Whiplash w, long orderId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
