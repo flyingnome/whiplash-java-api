@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.grandst.whiplash.constants.OrderStatus;
+import org.apache.http.protocol.HTTP;
 
 public class Order {
 	private long id;
@@ -450,7 +451,7 @@ public class Order {
 			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		Gson gson = gb.create();
 		String jObj = gson.toJson(oh, ApiOrderHolder.class);
-		return new StringEntity(jObj);
+		return new StringEntity(jObj, HTTP.UTF_8);
 	}
 	
 	public StringEntity getSerializedOrderForApiSansItems() throws UnsupportedEncodingException{
@@ -473,7 +474,7 @@ public class Order {
 			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		Gson gson = gb.create();
 		String jObj = gson.toJson(oh, ApiOrderHolder.class);
-		return new StringEntity(jObj);
+		return new StringEntity(jObj, HTTP.UTF_8);
 	}
 	
 	private class ApiOrder{
