@@ -40,6 +40,16 @@ public class ItemService {
 		}
 		return parseItemListJson(API.get("/items.json", w, sb.toString()));
 	}
+	public static WhiplashReturn getItemsWithPage(Whiplash w, long page) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
+		StringBuilder query = new StringBuilder();
+		query
+			.append("page=")
+			.append(page)
+			.append("&")
+			.append("limit=")
+			.append("150");
+		return parseItemListJson(API.get("/items.json", w,query.toString()));
+	}
 	public static WhiplashReturn getItemById(Whiplash w, long itemId) throws ClientProtocolException, ParseException, IOException, URISyntaxException{
 		return parseItemJson(API.get("/items/"+itemId, w));
 	}
